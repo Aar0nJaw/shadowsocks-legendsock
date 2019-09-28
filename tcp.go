@@ -10,6 +10,8 @@ import (
 	"github.com/shadowsocks-server/shadowsocks-legendsock/socks"
 )
 
+const tcpBufferSize = 4 * 1024
+
 func tcpRemote(instance *Instance, cipher func(net.Conn) net.Conn) {
 	socket, err := net.Listen("tcp", fmt.Sprintf(":%d", instance.Port))
 	if err != nil {
@@ -50,13 +52,13 @@ func tcpHandle(instance *Instance, client net.Conn, cipher func(net.Conn) net.Co
 
 func tcpRelay(instance *Instance, left, right net.Conn) {
 	go func() {
-		size, _ := io.CopyBuffer(right, left, make([]byte, 4096))
+		size, _ := io.CopyBuffer(right, left, make([]byte, tcpBufferSize))
 		instance.Bandwidth.IncreaseUpload(uint64(size))
 		right.SetDeadline(time.Now())
 		left.SetDeadline(time.Now())
 	}()
 
-	size, _ := io.CopyBuffer(left, right, make([]byte, 4096))
+	size, _ := io.CopyBuffer(left, right, make([]byte, tcpBufferSize))
 	instance.Bandwidth.IncreaseDownload(uint64(size))
 	right.SetDeadline(time.Now())
 	left.SetDeadline(time.Now())

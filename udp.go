@@ -26,33 +26,33 @@ func udpRemote(instance *Instance, cipher func(net.PacketConn) net.PacketConn) {
 	buffer := make([]byte, udpBufferSize)
 
 	for instance.Started {
-		size, remoteAddress, err := socket.ReadFrom(buffer)
+		size, remote, err := socket.ReadFrom(buffer)
 		if err != nil {
 			continue
 		}
 
-		targetAddress := socks.SplitAddr(buffer[:size])
-		if targetAddress == nil {
+		target := socks.SplitAddr(buffer[:size])
+		if target == nil {
 			continue
 		}
 
-		targetUDPAddress, err := net.ResolveUDPAddr("udp", targetAddress.String())
+		targetUDP, err := net.ResolveUDPAddr("udp", target.String())
 		if err != nil {
 			continue
 		}
 
-		data := buffer[len(targetAddress):size]
-		conn := nat.Get(remoteAddress.String())
+		data := buffer[len(target):size]
+		conn := nat.Get(remote.String())
 		if conn == nil {
 			conn, err = net.ListenPacket("udp", "")
 			if err != nil {
 				continue
 			}
 
-			nat.Add(instance, conn, socket, remoteAddress)
+			nat.Add(instance, conn, socket, remote)
 		}
 
-		size, err = conn.WriteTo(data, targetUDPAddress)
+		size, err = conn.WriteTo(data, targetUDP)
 		if err != nil {
 			continue
 		}
