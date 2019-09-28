@@ -129,11 +129,11 @@ func udpRelay(instance *Instance, src, dst net.PacketConn, target net.Addr, time
 			return err
 		}
 
-		sourceAddress := socks.ParseAddr(remoteAddress.String())
-		copy(buffer[len(sourceAddress):], buffer[:size])
-		copy(buffer, sourceAddress)
+		source := socks.ParseAddr(remoteAddress.String())
+		copy(buffer[len(source):], buffer[:size])
+		copy(buffer, source)
 
-		size, err = dst.WriteTo(buffer[:len(sourceAddress)+size], target)
+		size, err = dst.WriteTo(buffer[:len(source)+size], target)
 
 		if err != nil {
 			return err
