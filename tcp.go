@@ -7,7 +7,7 @@ import (
 	"net"
 	"time"
 
-	"github.com/shadowsocks-server/shadowsocks-legendsock/socks"
+	"github.com/aar0njaw/shadowsocks-legendsock/socks"
 )
 
 const tcpBufferSize = 4 * 1024
